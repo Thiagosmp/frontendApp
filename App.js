@@ -1,12 +1,42 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+
+import Splash from './src/screens/splash';
+import Title from './src/screens/title';
+import Autonomo from './src/components/title/loginAutonomo';
+import Cliente from './src/components/title/loginCliente';
+
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import RegisterCliente from "./src/components/title/registerCliente";
+import Entrar from "./src/components/title/registerCliente";
+import EntrarCliente from "./src/components/title/registerCliente";
+import EntrarAutonomo from "./src/components/title/registerAutonomo";
+import CompletarAutonomo from "./src/components/title/completarAutonomo";
+import CameraPhoto from "./src/components/title/camera";
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Inicio" component={Splash} />
+        <Stack.Screen
+          name="Login"
+          component={Title}
+          options={{
+            gestureEnabled: false,
+          }}
+        />
+        <Stack.Screen name="Camera" component={CameraPhoto} />
+        <Stack.Screen name="Completar Cadastro" component={CompletarAutonomo} />
+        <Stack.Screen name="Autonomo" component={Autonomo} />
+        <Stack.Screen name="Cliente" component={Cliente} />
+        <Stack.Screen name="Login Cliente" component={EntrarCliente} />
+        <Stack.Screen name="Login Autonomo" component={EntrarAutonomo} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 

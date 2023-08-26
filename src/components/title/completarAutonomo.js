@@ -24,7 +24,7 @@ export default function CompletarAutonomo({navigation, route}) {
     const [option, setOption] = useState(false);
 
     const handleSubmit = async () => {
-        //nada ainda
+        navigation.navigate('Perfil');
     };
 
     const addPhoto = () => {

@@ -19,7 +19,7 @@ export default function Cliente({ navigation }) {
   }
 
   const handleSubmit = () => {
-    // Enviar dados do formulário para um servidor
+    navigation.navigate('Listagem');
   };
 
   useEffect(() => {

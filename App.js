@@ -16,6 +16,7 @@ import CompletarAutonomo from "./src/components/title/completarAutonomo";
 import CameraPhoto from "./src/components/title/camera";
 import PerfilAutonomo from "./src/components/perfil/perfilAutonomo";
 import Listagem from "./src/components/listagem/Listagem";
+import Agenda from "./src/components/agenda/Agenda";
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +32,7 @@ export default function App() {
             gestureEnabled: false,
           }}
         />
+        <Stack.Screen name="Agenda" component={Agenda} />
         <Stack.Screen name="Listagem" component={Listagem} />
         <Stack.Screen name="Perfil" component={PerfilAutonomo} />
         <Stack.Screen name="Camera" component={CameraPhoto} />

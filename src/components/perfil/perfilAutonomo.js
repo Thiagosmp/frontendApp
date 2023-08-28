@@ -10,6 +10,11 @@ import {
 } from 'react-native';
 
 export default function PerfilAutonomo({navigation}) {
+
+    const handleSubmit = async () => {
+        navigation.navigate('Agenda');
+    };
+
     return (
         <ScrollView style={styles.container}>
             <View style={styles.topo}>
@@ -55,7 +60,7 @@ export default function PerfilAutonomo({navigation}) {
                     <Image source={require('../img/icons/pencil-fill-circle.png')}/>
                     <Text style={styles.btnText}>Editar Perfil</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.btnEdit}>
+                <TouchableOpacity style={styles.btnEdit} onPress={handleSubmit}>
                     <Image source={require('../img/icons/file-earmark-text-fill.png')}/>
                     <Text style={styles.btnText}>Verificar Agenda</Text>
                 </TouchableOpacity>

@@ -12,20 +12,54 @@ import {Picker} from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import {Camera} from "expo-camera";
 import CameraPhoto from "./camera";
+import axios from 'axios';
 
 export default function CompletarAutonomo({navigation, route}) {
     const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [age, setAge] = useState('');
     const [profession, setProfession] = useState('');
+    const [tel, setTel] = useState('');
+    const [gender, setGender] = useState('');
     const [description, setDescription] = useState('');
     const [estado, setEstado] = useState('');
     const [photo, setPhoto] = useState(null);
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const [city, setCity] = useState('');
     const [option, setOption] = useState(false);
+    const { customerId } = route.params;
+    const { csrfToken } = route.params;
+
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken, // Include the CSRF token in the headers
+    };
 
     const handleSubmit = async () => {
-        navigation.navigate('Perfil');
+        try {
+            const userData = {
+                id_usuario: customerId,
+                nome_completo: username,
+                idade: age,
+                profissao: profession,
+                genero: gender,
+                telefone: tel,
+                estado: estado,
+                cidade: city,
+                descricao: description,
+                foto: photo,
+            };
+
+            const response = await axios.post('http://192.168.1.7:8019/autonomo', userData, { headers });
+
+            if (response.status === 200) {
+                navigation.navigate('Perfil');
+            } else {
+                console.error('Request failed:', response.data);
+            }
+        } catch (error) {
+            console.error('Error submitting data:', error);
+        }
     };
+
 
     const addPhoto = () => {
         navigation.navigate('Camera');
@@ -127,8 +161,8 @@ export default function CompletarAutonomo({navigation, route}) {
                         <Text style={styles.subtitle}>Idade</Text>
                         <TextInput
                             style={styles.inputIdade}
-                            onChangeText={setUsername}
-                            value={username}
+                            onChangeText={setAge}
+                            value={age}
                             autoCapitalize="none"
                             keyboardType="email-address"
                             textContentType="emailAddress"
@@ -158,8 +192,8 @@ export default function CompletarAutonomo({navigation, route}) {
                 </Text>
                 <Picker
                     style={styles.pickerGenero}
-                    selectedValue={profession}
-                    onValueChange={(itemValue) => setProfession(itemValue)}
+                    selectedValue={gender}
+                    onValueChange={(itemValue) => setGender(itemValue)}
                 >
                     <Picker.Item label="Selecione uma opção" value=""/>
                     <Picker.Item label="Feminino" value="feminino"/>
@@ -171,12 +205,10 @@ export default function CompletarAutonomo({navigation, route}) {
                 </Text>
                 <TextInput
                     style={styles.input}
-                    onChangeText={setUsername}
-                    value={username}
+                    onChangeText={setTel}
+                    value={tel}
                     placeholder="(xx) x xxxx-xxxx"
                     autoCapitalize="none"
-                    keyboardType="email-address"
-                    textContentType="emailAddress"
                 />
                 <View style={styles.inputContainer}>
                     <View style={styles.inputFlex}>
@@ -184,7 +216,7 @@ export default function CompletarAutonomo({navigation, route}) {
                         <Picker
                             style={styles.pickerEstado}
                             selectedValue={estado}
-                            onValueChange={(itemValue) => setProfession(itemValue)}
+                            onValueChange={(itemValue) => setEstado(itemValue)}
                         >
                             <Picker.Item label="Selecione uma opção" value=""/>
                             <Picker.Item label="AC" value="AC"/>
@@ -220,8 +252,8 @@ export default function CompletarAutonomo({navigation, route}) {
                         <Text style={styles.subtitle}>Cidade</Text>
                         <Picker
                             style={styles.picker}
-                            selectedValue={profession}
-                            onValueChange={(itemValue) => setProfession(itemValue)}
+                            selectedValue={city}
+                            onValueChange={(itemValue) => setCity(itemValue)}
                         >
                             <Picker.Item label="Selecione uma opção" value=""/>
                             <Picker.Item label="Pintor" value="pintor"/>

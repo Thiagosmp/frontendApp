@@ -11,6 +11,7 @@ import {
 import axios from 'axios';
 
 export default function Autonomo({ navigation }) {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -23,39 +24,48 @@ export default function Autonomo({ navigation }) {
   }
 
   const handleSubmit = async () => {
-    let hasError = false;
+    try {
+      if (password !== confirmPassword) {
+        console.error('As senhas não coincidem.');
+        return;
+      }
 
-    if (!email) {
-      setEmailError('Insira seu email');
-      hasError = true;
-    } else {
-      setEmailError('');
+      if (password.length < 6) {
+        console.error('A senha deve conter pelo menos 6 caracteres.');
+        return;
+      }
+
+      const emailExists = await axios.get(`http://192.168.1.7:8019/check-email-user?email=${email}`);
+
+      if (emailExists.data.exists) {
+        console.error('Este email já está em uso.');
+        return;
+      }
+
+      // Obtenha o token CSRF do seu backend Laravel
+      const csrfToken = await axios.get('http://192.168.1.7:8019/csrf-token');
+
+      // Faça uma solicitação POST HTTP para seu backend com o token CSRF
+      const response = await axios.post(
+          'http://192.168.1.7:8019/register/users',
+          {
+            name: username,
+            email,
+            password,
+          },
+          {
+            headers: {
+              'X-CSRF-TOKEN': csrfToken.data,
+            },
+          }
+      );
+
+      // Lide com a resposta como antes
+      // ...
+    } catch (error) {
+      console.error('Ocorreu um erro durante o registro:', error);
+      // Trate os erros, por exemplo, mostre uma mensagem de erro ao usuário
     }
-
-    if (!password) {
-      setPasswordError('Insira sua senha');
-      hasError = true;
-    } else {
-      setPasswordError('');
-    }
-
-    if (!confirmPassword) {
-      setConfirmPasswordError('Confirme sua senha');
-      hasError = true;
-    } else {
-      setConfirmPasswordError('');
-    }
-
-    if (password !== confirmPassword) {
-      setConfirmPasswordError('As senhas não correspondem');
-      hasError = true;
-    }
-
-    if (hasError) {
-      return;
-    }
-
-    navigation.navigate('Completar Cadastro');
   };
 
   useEffect(() => {
@@ -77,6 +87,12 @@ export default function Autonomo({ navigation }) {
           </Text>
         </View>
         <View style={styles.form}>
+          <TextInput
+              style={styles.input}
+              onChangeText={setUsername}
+              value={username}
+              placeholder="Nome"
+          />
           <TextInput
               style={styles.input}
               onChangeText={setEmail}

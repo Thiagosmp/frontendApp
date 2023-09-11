@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     BackHandler,
     StyleSheet,
@@ -9,17 +9,82 @@ import {
     TouchableOpacity,
 } from 'react-native';
 
-export default function EntrarAutonomo({ navigation }) {
-    const [username, setUsername] = useState('');
+export default function EntrarAutonomo({navigation}) {
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
 
+    const isEmailValid = (email) => {
+        // Regular expression for basic email validation
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        return emailPattern.test(email);
+    };
     const goToRegister = () => {
         navigation.navigate('Autonomo');
     }
 
-    const handleSubmit = () => {
-
+    const getCSRFToken = async () => {
+        try {
+            const response = await fetch('http://192.168.1.7:8019/csrf-token');
+            if (response.ok) {
+                const csrfToken = await response.json();
+                return csrfToken;
+            } else {
+                throw new Error('Falha ao obter o token CSRF');
+            }
+        } catch (error) {
+            console.error('Erro ao obter o token CSRF:', error);
+            throw error;
+        }
     };
+
+    const handleSubmit = async () => {
+        try {
+            if (!email || !password) {
+                setError('Email and password are required.');
+                return;
+            }
+
+            if (!isEmailValid(email)) {
+                setError('Invalid email address.');
+                return;
+            }
+
+            const csrfToken = await getCSRFToken();
+            const response = await fetch('http://192.168.1.7:8019/login/customers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            });
+
+            if (response.status === 200) { // Verifique o código de status 200
+                const data = await response.json();
+                const customerId = data.customer_id; // Obtenha o ID da conta do cliente
+                console.log(data)
+                if (customerId) {
+                    // Login bem-sucedido
+                    navigation.navigate('Completar Cadastro', { customerId, csrfToken });
+                } else {
+                    // Algo deu errado ao obter o ID da conta do cliente
+                    setError('Erro ao obter o ID da conta do cliente.');
+                }
+            } else {
+                // Login falhou
+                const data = await response.json();
+                setError(data.msg || 'Erro desconhecido.');
+            }
+        } catch (error) {
+            console.error('Ocorreu um erro durante o login:', error);
+            setError('Ocorreu um erro durante o login.');
+        }
+    };
+
 
     useEffect(() => {
         BackHandler.addEventListener('hardwareBackPress', () => {
@@ -32,7 +97,7 @@ export default function EntrarAutonomo({ navigation }) {
             <View style={styles.topo}>
                 <Image
                     source={require('../img/logo.png')}
-                    style={{ width: 140, height: 140 }}
+                    style={{width: 140, height: 140}}
                 />
                 <Text style={styles.title}>Login Autônomo</Text>
                 <Text style={styles.subtitle}>
@@ -42,8 +107,8 @@ export default function EntrarAutonomo({ navigation }) {
             <View style={styles.form}>
                 <TextInput
                     style={styles.input}
-                    onChangeText={setUsername}
-                    value={username}
+                    onChangeText={setEmail}
+                    value={email}
                     placeholder="E-mail"
                     autoCapitalize="none"
                     keyboardType="email-address"
@@ -60,6 +125,7 @@ export default function EntrarAutonomo({ navigation }) {
                 <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                     <Text style={styles.buttonText}>Entrar</Text>
                 </TouchableOpacity>
+                {error ? <Text style={styles.errorText}>{error}</Text> : null}
             </View>
             <TouchableOpacity style={styles.toggleButton} onPress={goToRegister}>
                 <Text style={styles.toggleButtonText}>Não tenho uma conta</Text>
@@ -130,7 +196,7 @@ const styles = StyleSheet.create({
         width: '100%',
         fontSize: 17,
         shadowColor: '#00000033',
-        shadowOffset: { width: 0, height: 0 },
+        shadowOffset: {width: 0, height: 0},
         shadowOpacity: 1,
         shadowRadius: 4,
         elevation: 2,

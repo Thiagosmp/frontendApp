@@ -10,6 +10,22 @@ import {
 } from 'react-native';
 
 export default function Listagem({navigation}) {
+
+    const [data, setData] = useState([]); // Initialize state to hold fetched data
+
+    useEffect(() => {
+        // Fetch data from the API
+        fetch('http://192.168.1.7:8019/get-autonomo')
+            .then((response) => response.json())
+            .then((responseData) => {
+                setData(responseData);
+                console.log(data)
+            })
+            .catch((error) => {
+                console.error('Error fetching data:', error);
+            });
+    }, []);
+
     return (
         <ScrollView style={styles.container}>
             <View style={styles.list}>
@@ -19,140 +35,30 @@ export default function Listagem({navigation}) {
                         <Text style={styles.profissao}>Filtrar</Text>
                     </TouchableOpacity>
                 </View>
-                <View style={styles.box}>
-                    <Image source={require('../img/profissoes/pintorIcon.png')} style={styles.icon}/>
-                    <View style={styles.content}>
-                        <Text>Lucas Gouvêa Alves de Oliveira</Text>
-                        <Text>Profissão: <Text style={styles.span}>Pintor</Text></Text>
-                        <View style={styles.avaliation}>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Text style={styles.numberAvaliation}>(4) avaliações</Text>
+                <View style={styles.list}>
+                    {data.map((item) => (
+                        <View style={styles.box} key={item.id}>
+                            {/*<Image source={require(`../img/profissoes/${item.profissao}.png`)} style={styles.icon}/>*/}
+                            <View style={styles.content}>
+                                <Text>{item.nome_completo}</Text>
+                                <Text>
+                                    Profissão: <Text style={styles.span}>{item.profissao}</Text>
+                                </Text>
+                                <View style={styles.avaliation}>
+                                    {Array.from({ length: item.media_avaliacao }).map((_, index) => (
+                                        <Image
+                                            source={require('../img/icons/star.png')}
+                                            style={styles.avaliationIcon}
+                                            key={index}
+                                        />
+                                    ))}
+                                    <Text style={styles.numberAvaliation}>
+                                        ({item.media_avaliacao} avaliações)
+                                    </Text>
+                                </View>
+                            </View>
                         </View>
-                    </View>
-                </View>
-                <View style={styles.box}>
-                    <Image source={require('../img/profissoes/eletricistaIcon.png')} style={styles.icon}/>
-                    <View style={styles.content}>
-                        <Text>Guilherme Soares Lourenço</Text>
-                        <Text>Profissão: <Text style={styles.span}>Eletricista</Text></Text>
-                        <View style={styles.avaliation}>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Text style={styles.numberAvaliation}>(4) avaliações</Text>
-                        </View>
-                    </View>
-                </View>
-                <View style={styles.box}>
-                    <Image source={require('../img/profissoes/faxineiraIcon.png')} style={styles.icon}/>
-                    <View style={styles.content}>
-                        <Text>Antônio Boeri</Text>
-                        <Text>Profissão: <Text style={styles.span}>Faxineiro(a)</Text></Text>
-                        <View style={styles.avaliation}>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Text style={styles.numberAvaliation}>(4) avaliações</Text>
-                        </View>
-                    </View>
-                </View>
-                <View style={styles.box}>
-                    <Image source={require('../img/profissoes/pedreiroIcon.png')} style={styles.icon}/>
-                    <View style={styles.content}>
-                        <Text>Luiz Geraldo Campos</Text>
-                        <Text>Profissão: <Text style={styles.span}>Pedreiro</Text></Text>
-                        <View style={styles.avaliation}>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Text style={styles.numberAvaliation}>(4) avaliações</Text>
-                        </View>
-                    </View>
-                </View>
-                <View style={styles.box}>
-                    <Image source={require('../img/profissoes/ecanadorIcon.png')} style={styles.icon}/>
-                    <View style={styles.content}>
-                        <Text>Natalia Oliveira</Text>
-                        <Text>Profissão: <Text style={styles.span}>Ecanador(a)</Text></Text>
-                        <View style={styles.avaliation}>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Text style={styles.numberAvaliation}>(4) avaliações</Text>
-                        </View>
-                    </View>
-                </View>
-                <View style={styles.box}>
-                    <Image source={require('../img/profissoes/cuidadorIcon.png')} style={styles.icon}/>
-                    <View style={styles.content}>
-                        <Text>Bianca Henrique Almeida</Text>
-                        <Text>Profissão: <Text style={styles.span}>Cuidador(a)</Text></Text>
-                        <View style={styles.avaliation}>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Text style={styles.numberAvaliation}>(4) avaliações</Text>
-                        </View>
-                    </View>
-                </View>
-                <View style={styles.box}>
-                    <Image source={require('../img/profissoes/piscineiroIcon.png')} style={styles.icon}/>
-                    <View style={styles.content}>
-                        <Text>Gilson Mariano Souza</Text>
-                        <Text>Profissão: <Text style={styles.span}>Piscineiro</Text></Text>
-                        <View style={styles.avaliation}>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Text style={styles.numberAvaliation}>(4) avaliações</Text>
-                        </View>
-                    </View>
-                </View>
-                <View style={styles.box}>
-                    <Image source={require('../img/profissoes/jardineiroIcon.png')} style={styles.icon}/>
-                    <View style={styles.content}>
-                        <Text>Fernando Depieri Junior</Text>
-                        <Text>Profissão: <Text style={styles.span}>Jardineiro</Text></Text>
-                        <View style={styles.avaliation}>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Text style={styles.numberAvaliation}>(4) avaliações</Text>
-                        </View>
-                    </View>
-                </View>
-                <View style={styles.box}>
-                    <Image source={require('../img/profissoes/chaveiroIcon.png')} style={styles.icon}/>
-                    <View style={styles.content}>
-                        <Text>Bruno Alcantra</Text>
-                        <Text>Profissão: <Text style={styles.span}>Chaveiro</Text></Text>
-                        <View style={styles.avaliation}>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Image source={require('../img/icons/star.png')} style={styles.avaliationIcon}/>
-                            <Text style={styles.numberAvaliation}>(4) avaliações</Text>
-                        </View>
-                    </View>
+                    ))}
                 </View>
             </View>
         </ScrollView>

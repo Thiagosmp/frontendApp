@@ -8,6 +8,7 @@ import {
     TextInput,
     TouchableOpacity,
 } from 'react-native';
+import {BASE_URL} from "../../Config";
 
 export default function EntrarAutonomo({navigation}) {
     const [email, setEmail] = useState('');
@@ -25,7 +26,7 @@ export default function EntrarAutonomo({navigation}) {
 
     const getCSRFToken = async () => {
         try {
-            const response = await fetch('http://192.168.1.7:8019/csrf-token');
+            const response = await fetch(`${BASE_URL}/csrf-token`);
             if (response.ok) {
                 const csrfToken = await response.json();
                 return csrfToken;
@@ -51,7 +52,7 @@ export default function EntrarAutonomo({navigation}) {
             }
 
             const csrfToken = await getCSRFToken();
-            const response = await fetch('http://192.168.1.7:8019/login/customers', {
+            const response = await fetch(`${BASE_URL}/login/customers`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -66,10 +67,9 @@ export default function EntrarAutonomo({navigation}) {
             if (response.status === 200) { // Verifique o código de status 200
                 const data = await response.json();
                 const customerId = data.customer_id; // Obtenha o ID da conta do cliente
-                console.log(data)
                 if (customerId) {
                     // Login bem-sucedido
-                    navigation.navigate('Completar Cadastro', { customerId, csrfToken });
+                    navigation.navigate('Perfil', { customerId, csrfToken });
                 } else {
                     // Algo deu errado ao obter o ID da conta do cliente
                     setError('Erro ao obter o ID da conta do cliente.');

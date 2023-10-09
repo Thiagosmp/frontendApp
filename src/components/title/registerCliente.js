@@ -8,6 +8,7 @@ import {
     TextInput,
     TouchableOpacity,
 } from 'react-native';
+import {BASE_URL} from "../../Config";
 
 export default function EntrarCliente({navigation}) {
     const [email, setEmail] = useState('');
@@ -26,7 +27,7 @@ export default function EntrarCliente({navigation}) {
 
     const getCSRFToken = async () => {
         try {
-            const response = await fetch('http://192.168.1.7:8019/csrf-token');
+            const response = await fetch(`${BASE_URL}/csrf-token`);
             if (response.ok) {
                 const csrfToken = await response.json();
                 return csrfToken;
@@ -52,7 +53,7 @@ export default function EntrarCliente({navigation}) {
             }
 
             const csrfToken = await getCSRFToken();
-            const response = await fetch('http://192.168.1.7:8019/login/users', {
+            const response = await fetch(`${BASE_URL}/login/users`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

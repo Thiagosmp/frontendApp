@@ -9,6 +9,7 @@ import {
   TouchableOpacity, ScrollView,
 } from 'react-native';
 import axios from 'axios';
+import {BASE_URL} from "../../Config";
 
 export default function Autonomo({ navigation }) {
   const [username, setUsername] = useState('');
@@ -35,7 +36,7 @@ export default function Autonomo({ navigation }) {
         return;
       }
 
-      const emailExists = await axios.get(`http://192.168.1.7:8019/check-email-user?email=${email}`);
+      const emailExists = await axios.get(`${BASE_URL}/check-email?email=${email}`);
 
       if (emailExists.data.exists) {
         console.error('Este email já está em uso.');
@@ -43,11 +44,11 @@ export default function Autonomo({ navigation }) {
       }
 
       // Obtenha o token CSRF do seu backend Laravel
-      const csrfToken = await axios.get('http://192.168.1.7:8019/csrf-token');
+      const csrf = await axios.get(`${BASE_URL}/csrf-token`);
 
       // Faça uma solicitação POST HTTP para seu backend com o token CSRF
       const response = await axios.post(
-          'http://192.168.1.7:8019/register/users',
+          `${BASE_URL}/register/customers`,
           {
             name: username,
             email,
@@ -55,13 +56,38 @@ export default function Autonomo({ navigation }) {
           },
           {
             headers: {
-              'X-CSRF-TOKEN': csrfToken.data,
+              'X-CSRF-TOKEN': csrf.data,
             },
           }
       );
 
-      // Lide com a resposta como antes
-      // ...
+      if (response.data.success) {
+
+        const loginResponse = await fetch(`${BASE_URL}/login/customers`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrf.data,
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        });
+
+        if (loginResponse.status === 200) {
+          const loginData = await loginResponse.json();
+          const customerId = loginData.customer_id; // Obtain the customerId from loginData
+
+          const csrfToken = csrf.data;
+
+          navigation.navigate('Completar Cadastro', { customerId, csrfToken });
+        } else {
+          console.error('Ocorreu um erro durante o login:', loginResponse.data.msg || 'Erro desconhecido.');
+        }
+      } else {
+        console.error('Ocorreu um erro durante o registro:', response.data.error);
+      }
     } catch (error) {
       console.error('Ocorreu um erro durante o registro:', error);
       // Trate os erros, por exemplo, mostre uma mensagem de erro ao usuário

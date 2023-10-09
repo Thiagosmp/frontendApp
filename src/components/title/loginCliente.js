@@ -9,6 +9,7 @@ import {
     TouchableOpacity, ScrollView,
 } from 'react-native';
 import axios from "axios";
+import {BASE_URL} from "../../Config";
 
 export default function Cliente({navigation}) {
     const [username, setUsername] = useState('');
@@ -32,7 +33,7 @@ export default function Cliente({navigation}) {
                 return;
             }
 
-          const emailExists = await axios.get(`http://192.168.1.7:8019/check-email-user?email=${email}`);
+          const emailExists = await axios.get(`${BASE_URL}/check-email-user?email=${email}`);
 
           if (emailExists.data.exists) {
             console.error('Este email já está em uso.');
@@ -41,11 +42,11 @@ export default function Cliente({navigation}) {
 
 
           // Obtenha o token CSRF do seu backend Laravel
-            const csrfToken = await axios.get('http://192.168.1.7:8019/csrf-token');
+            const csrfToken = await axios.get(`${BASE_URL}/csrf-token`);
 
             // Faça uma solicitação POST HTTP para seu backend com o token CSRF
             const response = await axios.post(
-                'http://192.168.1.7:8019/register/users',
+                `${BASE_URL}/register/users`,
                 {
                     name: username,
                     email,

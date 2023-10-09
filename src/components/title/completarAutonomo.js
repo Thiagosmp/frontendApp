@@ -13,6 +13,7 @@ import * as ImagePicker from 'expo-image-picker';
 import {Camera} from "expo-camera";
 import CameraPhoto from "./camera";
 import axios from 'axios';
+import { BASE_URL } from '../../Config';
 
 export default function CompletarAutonomo({navigation, route}) {
     const [username, setUsername] = useState('');
@@ -27,15 +28,42 @@ export default function CompletarAutonomo({navigation, route}) {
     const [option, setOption] = useState(false);
     const { customerId } = route.params;
     const { csrfToken } = route.params;
+    const { profileData } = route.params;
+    const [estados, setEstados] = useState([]);
+    const [cidades, setCidades] = useState([]);
+
+    const carregarEstados = async () => {
+        try {
+            const response = await axios.get('https://servicodados.ibge.gov.br/api/v1/localidades/estados');
+            setEstados(response.data);
+        } catch (error) {
+            console.error('Error fetching states:', error);
+        }
+    };
+
+    const carregarCidades = async (uf) => {
+        try {
+            const response = await axios.get(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`);
+            setCidades(response.data);
+        } catch (error) {
+            console.error('Error fetching cities:', error);
+        }
+    };
+
+    useEffect(() => {
+        carregarEstados();
+    }, []);
+
 
     const headers = {
         'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': csrfToken, // Include the CSRF token in the headers
+        'X-CSRF-TOKEN': csrfToken,
     };
 
     const handleSubmit = async () => {
         try {
             const userData = {
+                id: profileData ? profileData.id : null,
                 id_usuario: customerId,
                 nome_completo: username,
                 idade: age,
@@ -48,10 +76,11 @@ export default function CompletarAutonomo({navigation, route}) {
                 foto: photo,
             };
 
-            const response = await axios.post('http://192.168.1.7:8019/autonomo', userData, { headers });
+            const response = await axios.post(`${BASE_URL}/autonomo`, userData, { headers });
 
             if (response.status === 200) {
-                navigation.navigate('Perfil');
+
+                navigation.navigate('Perfil', {customerId, csrfToken});
             } else {
                 console.error('Request failed:', response.data);
             }
@@ -65,6 +94,25 @@ export default function CompletarAutonomo({navigation, route}) {
         navigation.navigate('Camera');
         setOption(false);
         // setPhoto(true);
+    };
+
+    const formatPhoneNumber = (phoneNumber) => {
+        // Remove todos os caracteres não numéricos do número de telefone
+        const cleaned = phoneNumber.replace(/\D/g, '');
+
+        // Formata o número como (xx) x xxxx-xxxx
+        const match = cleaned.match(/^(\d{2})(\d{1})(\d{4})(\d{4})$/);
+        if (match) {
+            return `(${match[1]}) ${match[2]} ${match[3]}-${match[4]}`;
+        }
+
+        // Retorna o número não formatado se não for possível formatar
+        return cleaned;
+    };
+
+    const handleTelChange = (text) => {
+        const formattedTel = formatPhoneNumber(text);
+        setTel(formattedTel);
     };
 
     const carregarPhoto = async () => {
@@ -95,6 +143,22 @@ export default function CompletarAutonomo({navigation, route}) {
     const closeOption = () => {
         setOption(false);
     };
+
+    useEffect(() => {
+        if (profileData) {
+            setUsername(profileData.nome_completo);
+            setAge(profileData.idade);
+            setProfession(profileData.profissao);
+            setGender(profileData.genero);
+            setTel(profileData.telefone);
+            setEstado(profileData.estado);
+            setCity(profileData.cidade);
+            setDescription(profileData.descricao);
+            if (profileData.foto) {
+                setPhoto(profileData.foto);
+            }
+        }
+    }, [profileData]);
 
     useEffect(() => {
         if (route.params && route.params.photoSaved) {
@@ -162,7 +226,7 @@ export default function CompletarAutonomo({navigation, route}) {
                         <TextInput
                             style={styles.inputIdade}
                             onChangeText={setAge}
-                            value={age}
+                            value={age.toString()}
                             autoCapitalize="none"
                             keyboardType="email-address"
                             textContentType="emailAddress"
@@ -205,10 +269,11 @@ export default function CompletarAutonomo({navigation, route}) {
                 </Text>
                 <TextInput
                     style={styles.input}
-                    onChangeText={setTel}
+                    onChangeText={handleTelChange}
                     value={tel}
                     placeholder="(xx) x xxxx-xxxx"
                     autoCapitalize="none"
+                    keyboardType="phone-pad"
                 />
                 <View style={styles.inputContainer}>
                     <View style={styles.inputFlex}>
@@ -216,36 +281,16 @@ export default function CompletarAutonomo({navigation, route}) {
                         <Picker
                             style={styles.pickerEstado}
                             selectedValue={estado}
-                            onValueChange={(itemValue) => setEstado(itemValue)}
+                            onValueChange={(itemValue) => {
+                                setEstado(itemValue);
+                                // Quando o estado for alterado, carregue as cidades correspondentes
+                                carregarCidades(itemValue);
+                            }}
                         >
-                            <Picker.Item label="Selecione uma opção" value=""/>
-                            <Picker.Item label="AC" value="AC"/>
-                            <Picker.Item label="AL" value="AL"/>
-                            <Picker.Item label="AP" value="AP"/>
-                            <Picker.Item label="AM" value="AM"/>
-                            <Picker.Item label="BA" value="BA"/>
-                            <Picker.Item label="CE" value="CE"/>
-                            <Picker.Item label="DF" value="DF"/>
-                            <Picker.Item label="ES" value="ES"/>
-                            <Picker.Item label="GO" value="GO"/>
-                            <Picker.Item label="MA" value="MA"/>
-                            <Picker.Item label="MT" value="MT"/>
-                            <Picker.Item label="MS" value="MS"/>
-                            <Picker.Item label="MG" value="MG"/>
-                            <Picker.Item label="PA" value="PA"/>
-                            <Picker.Item label="PB" value="PB"/>
-                            <Picker.Item label="PR" value="PR"/>
-                            <Picker.Item label="PE" value="PE"/>
-                            <Picker.Item label="PI" value="PI"/>
-                            <Picker.Item label="RJ" value="RJ"/>
-                            <Picker.Item label="RN" value="RN"/>
-                            <Picker.Item label="RS" value="RS"/>
-                            <Picker.Item label="RO" value="RO"/>
-                            <Picker.Item label="RR" value="RR"/>
-                            <Picker.Item label="SC" value="SC"/>
-                            <Picker.Item label="SP" value="SP"/>
-                            <Picker.Item label="SE" value="SE"/>
-                            <Picker.Item label="TO" value="TO"/>
+                            <Picker.Item label="Selecione uma opção" value="" />
+                            {estados.map((e) => (
+                                <Picker.Item key={e.sigla} label={e.sigla} value={e.sigla} />
+                            ))}
                         </Picker>
                     </View>
                     <View style={styles.inputFlex}>
@@ -255,15 +300,10 @@ export default function CompletarAutonomo({navigation, route}) {
                             selectedValue={city}
                             onValueChange={(itemValue) => setCity(itemValue)}
                         >
-                            <Picker.Item label="Selecione uma opção" value=""/>
-                            <Picker.Item label="Pintor" value="pintor"/>
-                            <Picker.Item label="Eletricista" value="eletricista"/>
-                            <Picker.Item label="Pedreiro" value="pedreiro"/>
-                            <Picker.Item label="Faxineiro(a)" value="faxineiro"/>
-                            <Picker.Item label="Cuidador(a)" value="cuidador"/>
-                            <Picker.Item label="Encanador(a)" value="encanador"/>
-                            <Picker.Item label="Piscineiro" value="piscineiro"/>
-                            <Picker.Item label="Chaveiro" value="chaveiro"/>
+                            <Picker.Item label="Selecione uma opção" value="" />
+                            {cidades.map((c) => (
+                                <Picker.Item key={c.id} label={c.nome} value={c.nome} />
+                            ))}
                         </Picker>
                     </View>
                 </View>
@@ -329,7 +369,7 @@ const styles = StyleSheet.create({
         transitionProperty: 'borderColor, boxShadow',
         transitionDuration: '0.3s',
         transitionTimingFunction: 'ease-in-out',
-        width: 280,
+        width: 250,
         padding: 12,
         marginVertical: 8,
         boxSizing: 'border-box',
@@ -357,7 +397,7 @@ const styles = StyleSheet.create({
         transitionProperty: 'borderColor, boxShadow',
         transitionDuration: '0.3s',
         transitionTimingFunction: 'ease-in-out',
-        width: 70,
+        width: 100,
         padding: 12,
         marginVertical: 8,
         marginRight: 20,
@@ -404,7 +444,7 @@ const styles = StyleSheet.create({
         transitionProperty: 'borderColor, boxShadow',
         transitionDuration: '0.3s',
         transitionTimingFunction: 'ease-in-out',
-        width: 70,
+        width: 100,
         padding: 12,
         marginVertical: 8,
         marginRight: 20,

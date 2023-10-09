@@ -9,11 +9,11 @@ export default function Title({ navigation }) {
   }, []);
 
   const handlePress1 = () => {
-    navigation.navigate('Cliente');
+    navigation.navigate('Login Cliente');
   };
 
   const handlePress2 = () => {
-    navigation.navigate('Autonomo');
+    navigation.navigate('Login Autonomo');
   };
 
   return (

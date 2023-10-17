@@ -13,14 +13,12 @@ import { useRoute } from '@react-navigation/native';
 export default function VerAutonomo({navigation}) {
 
     const route = useRoute();
+    const {userId} = route.params;
 
     const professionalData = route.params.professionalData;
 
-    useEffect(() => {
-        console.log(professionalData)
-    })
     const handleSubmit = async () => {
-        navigation.navigate('Agenda');
+        navigation.navigate('Agenda', {professionalData, userId});
     };
 
     return (

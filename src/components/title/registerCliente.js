@@ -66,8 +66,15 @@ export default function EntrarCliente({navigation}) {
             });
 
             if (response.status === 200) { // Verifique o código de status 200
-                // Login bem-sucedido
-                navigation.navigate('Listagem'); // Redirecione para a página após o login
+                const data = await response.json();
+                const userId = data.customer_id; // Obtenha o ID da conta do cliente
+                if (userId) {
+                    // Login bem-sucedido
+                    navigation.navigate('Listagem', {userId});
+                } else {
+                    // Algo deu errado ao obter o ID da conta do cliente
+                    setError('Erro ao obter o ID da conta do cliente.');
+                }
             } else {
                 // Login falhou
                 const data = await response.json();

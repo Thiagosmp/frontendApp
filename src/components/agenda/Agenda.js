@@ -6,10 +6,14 @@ import {
     View,
     Image,
     TextInput,
-    TouchableOpacity, ScrollView, Modal
+    TouchableOpacity,
+    ScrollView,
+    Modal,
 } from 'react-native';
+import {BASE_URL} from "../../Config";
+import axios from "axios";
 
-export default function Agenda({navigation}) {
+export default function Agenda({route, navigation}) {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()); // Change this to the desired month
     const currentYear = new Date().getFullYear();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -17,6 +21,59 @@ export default function Agenda({navigation}) {
 
     const [selectedDate, setSelectedDate] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const {userId} = route.params;
+    const {professionalData} = route.params;
+
+    const [selectedTime, setSelectedTime] = useState(null);
+    const [serviceDescription, setServiceDescription] = useState('');
+
+    const [availableTimes, setAvailableTimes] = useState([
+        '6:00',
+        '7:00',
+        '8:00',
+        '9:00',
+        '10:00',
+        '11:00',
+        '12:00',
+        '13:00',
+        '14:00',
+        '15:00',
+        '16:00',
+        '17:00',
+        '18:00',
+        '19:00',
+        '20:00',
+        '21:00',
+        '22:00',
+    ]);
+
+    const handleTimeSelection = (time) => {
+        setSelectedTime(time);
+    };
+
+    const handleConfirmation = () => {
+        if (!selectedTime) {
+            // Display an error message to the user, indicating that they must select a time.
+            return;
+        }
+
+        const requestDetails = {
+            date: selectedDate,
+            time: selectedTime,
+            description: serviceDescription,
+            // Other necessary fields
+        };
+
+        // Simulate a request to a server (you should replace this with your actual server request)
+        setTimeout(() => {
+            // Request successful, you can close the modal
+            setIsModalVisible(false);
+            // You can also reset the selected time and description here
+            setSelectedTime(null);
+            setServiceDescription('');
+        }, 1000);
+    };
+
 
     const toggleModal = (date) => {
         setSelectedDate(date);
@@ -33,7 +90,6 @@ export default function Agenda({navigation}) {
         setCurrentMonth(newMonth > 11 ? 0 : newMonth);
     };
 
-
     const renderCalendar = () => {
         const calendar = [];
         let dayCounter = 1;
@@ -44,14 +100,17 @@ export default function Agenda({navigation}) {
             let isEmptyWeek = true; // Flag to track if the week is empty
 
             for (let day = 0; day < 7; day++) {
-                if ((week === 0 && day < firstDayOfMonth) || dayCounter > daysInMonth) {
+                if (week === 0 && day < firstDayOfMonth) {
+                    days.push(<View key={day} style={styles.day}/>);
+                } else if (dayCounter > daysInMonth) {
                     days.push(<View key={day} style={styles.day}/>);
                 } else {
+                    const date = `${dayCounter}/${currentMonth + 1}/${currentYear}`;
                     days.push(
                         <TouchableOpacity
                             key={day}
                             style={styles.day}
-                            onPress={() => toggleModal(`0${day}/0${currentMonth + 1}/${currentYear}`)}
+                            onPress={() => toggleModal(date)}
                         >
                             <Text style={styles.dayNumber}>{dayCounter}</Text>
                         </TouchableOpacity>
@@ -76,24 +135,67 @@ export default function Agenda({navigation}) {
 
     function getMonthName(monthIndex) {
         const monthNames = [
-            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+            'Janeiro',
+            'Fevereiro',
+            'Março',
+            'Abril',
+            'Maio',
+            'Junho',
+            'Julho',
+            'Agosto',
+            'Setembro',
+            'Outubro',
+            'Novembro',
+            'Dezembro',
         ];
         return monthNames[monthIndex];
     }
+
+    const createAgendamento = async () => {
+        try {
+            const userData = {
+                id_cliente: userId,
+                id_autonomo: professionalData.id,
+                data: selectedDate,
+                horario: selectedTime,
+                descricao: serviceDescription,
+                status: 'pendente',
+                servico_finalizado: false,
+            };
+
+            const response = await axios.post(`${BASE_URL}/agendamentos`, userData);
+
+            if (response.status >= 200 && response.status < 300) {
+                console.log('Request successful');
+                // Handle success, e.g., navigate to a success screen
+            } else {
+                console.error('Request failed with status code:', response.status);
+                console.error('Response data:', response.data);
+                // Handle the error case, e.g., display an error message to the user
+            }
+        } catch (error) {
+            console.error('Error submitting data:', error);
+            // Handle the error case, e.g., display an error message to the user
+        }
+    };
+
 
     return (
         <>
             <ScrollView style={styles.container}>
                 <View style={styles.agenda}>
                     <Text style={styles.agendaTitle}>Agende seu serviço</Text>
-                    <Text style={styles.agendaSubTitle}>Verifique o dia e as disponibilidades de horários, entre outros
-                        detalhes.</Text>
+                    <Text style={styles.agendaSubTitle}>
+                        Verifique o dia e as disponibilidades de horários, entre outros
+                        detalhes.
+                    </Text>
                     <View style={styles.monthNavigation}>
                         <TouchableOpacity onPress={goToPreviousMonth}>
                             <Text style={styles.navigationText}>&lt;</Text>
                         </TouchableOpacity>
-                        <Text style={styles.mesAno}>{getMonthName(currentMonth)} {currentYear}</Text>
+                        <Text style={styles.mesAno}>
+                            {getMonthName(currentMonth)} {currentYear}
+                        </Text>
                         <TouchableOpacity onPress={goToNextMonth}>
                             <Text style={styles.navigationText}>&gt;</Text>
                         </TouchableOpacity>
@@ -108,9 +210,7 @@ export default function Agenda({navigation}) {
                         <Text style={styles.dayOfWeek}>Sex</Text>
                         <Text style={styles.dayOfWeek}>Sab</Text>
                     </View>
-                    <View style={styles.calendarDay}>
-                        {renderCalendar()}
-                    </View>
+                    <View style={styles.calendarDay}>{renderCalendar()}</View>
                     <View style={styles.legend}>
                         <View style={[styles.legendColor, {backgroundColor: '#ff00009a'}]}/>
                         <Text style={styles.legendText}>Ocupado</Text>
@@ -127,24 +227,41 @@ export default function Agenda({navigation}) {
                         <Text style={styles.agendaSubTitleHours}>Data disponível</Text>
                         <Text style={styles.dataDia}>{selectedDate}</Text>
                         <Text style={styles.agendaSubTitleHours}>Horários</Text>
-                        <View style={styles.horarios}>
-                            <Text style={[styles.horario, {backgroundColor: '#ff00009a'}]}>09:30</Text>
-                            <Text style={[styles.horario, {backgroundColor: '#00ff009a'}]}>11:30</Text>
-                            <Text style={[styles.horario, {backgroundColor: '#ccc'}]}>15:30</Text>
-                            <Text style={[styles.horario, {backgroundColor: '#ccc'}]}>16:45</Text>
-                        </View>
+                        <ScrollView style={styles.horarios}
+                              horizontal={true}
+                              contentContainerStyle={styles.horariosContent}
+                        >
+                            {availableTimes.map((time) => (
+                                <TouchableOpacity
+                                    key={time}
+                                    style={[styles.horario, {backgroundColor: '#ccc'}]}
+                                    onPress={() => handleTimeSelection(time)}
+                                >
+                                    <Text>{time}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
                         <Text style={styles.agendaSubTitleHours}>Solicitar serviço</Text>
                         <TextInput
                             style={styles.description}
                             placeholder="Insira a descrição do serviço"
                             multiline={true}
                             numberOfLines={4}
+                            value={serviceDescription}
+                            onChangeText={(text) => setServiceDescription(text)}
                         />
+
                         <View style={styles.buttonContainer}>
-                            <TouchableOpacity style={styles.buttonRed} onPress={() => setIsModalVisible(false)}>
+                            <TouchableOpacity
+                                style={styles.buttonRed}
+                                onPress={() => setIsModalVisible(false)}
+                            >
                                 <Text>Cancelar</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.buttonGreen} onPress={() => setIsModalVisible(false)}>
+                            <TouchableOpacity
+                                style={styles.buttonGreen}
+                                onPress={createAgendamento}
+                            >
                                 <Text>Confirmar</Text>
                             </TouchableOpacity>
                         </View>
@@ -154,6 +271,7 @@ export default function Agenda({navigation}) {
         </>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {
@@ -216,12 +334,12 @@ const styles = StyleSheet.create({
     },
     horarios: {
         flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
         marginBottom: 20,
         marginTop: 10,
+    },
+    horariosContent: {
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     horario: {
         fontSize: 14,

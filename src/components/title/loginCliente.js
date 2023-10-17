@@ -33,15 +33,13 @@ export default function Cliente({navigation}) {
                 return;
             }
 
-          const emailExists = await axios.get(`${BASE_URL}/check-email-user?email=${email}`);
+            const emailExists = await axios.get(`${BASE_URL}/check-email-user?email=${email}`);
 
-          if (emailExists.data.exists) {
-            console.error('Este email já está em uso.');
-            return;
-          }
-
-
-          // Obtenha o token CSRF do seu backend Laravel
+            if (emailExists.data.exists) {
+                console.error('Este email já está em uso.');
+                return;
+            }
+            // Obtenha o token CSRF do seu backend Laravel
             const csrfToken = await axios.get(`${BASE_URL}/csrf-token`);
 
             // Faça uma solicitação POST HTTP para seu backend com o token CSRF
@@ -59,8 +57,33 @@ export default function Cliente({navigation}) {
                 }
             );
 
-            // Lide com a resposta como antes
-            // ...
+            if (response.data.success) {
+
+                const loginResponse = await fetch(`${BASE_URL}/login/users`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrf.data,
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password,
+                    }),
+                });
+
+                if (loginResponse.status === 200) {
+                    const loginData = await loginResponse.json();
+                    const userId = loginData.customer_id; // Obtain the customerId from loginData
+
+                    const csrfToken = csrf.data;
+
+                    navigation.navigate('Listagem', { userId, csrfToken });
+                } else {
+                    console.error('Ocorreu um erro durante o login:', loginResponse.data.msg || 'Erro desconhecido.');
+                }
+            } else {
+                console.error('Ocorreu um erro durante o registro:', response.data.error);
+            }
         } catch (error) {
             console.error('Ocorreu um erro durante o registro:', error);
             // Trate os erros, por exemplo, mostre uma mensagem de erro ao usuário

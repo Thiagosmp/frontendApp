@@ -22,7 +22,7 @@ import {FontAwesome} from "@expo/vector-icons";
 import {Picker} from "@react-native-picker/picker";
 import {BASE_URL} from "../../Config";
 
-export default function Listagem({navigation}) {
+export default function Listagem({route, navigation}) {
 
     const [data, setData] = useState([]);
     const [openFilter, setOpenFilter] = useState(false);
@@ -30,6 +30,9 @@ export default function Listagem({navigation}) {
     const [name, setName] = useState('');
     const [orderBy, setOrderBy] = useState('');
     const [filteredData, setFilteredData] = useState([]);
+
+    const {userId} = route.params;
+    const {csrfToken} = route.params;
 
     const closeOption = () => {
         setOpenFilter(false);
@@ -94,7 +97,7 @@ export default function Listagem({navigation}) {
     }, []);
 
     const handleProfileClick = (item) => {
-        navigation.navigate('Perfil do Autonomo', { professionalData: item });
+        navigation.navigate('Perfil do Autonomo', { professionalData: item, userId });
     };
 
     return (

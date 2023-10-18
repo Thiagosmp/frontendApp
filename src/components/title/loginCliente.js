@@ -40,7 +40,7 @@ export default function Cliente({navigation}) {
                 return;
             }
             // Obtenha o token CSRF do seu backend Laravel
-            const csrfToken = await axios.get(`${BASE_URL}/csrf-token`);
+            const csrf = await axios.get(`${BASE_URL}/csrf-token`);
 
             // Faça uma solicitação POST HTTP para seu backend com o token CSRF
             const response = await axios.post(
@@ -52,7 +52,7 @@ export default function Cliente({navigation}) {
                 },
                 {
                     headers: {
-                        'X-CSRF-TOKEN': csrfToken.data,
+                        'X-CSRF-TOKEN': csrf.data,
                     },
                 }
             );

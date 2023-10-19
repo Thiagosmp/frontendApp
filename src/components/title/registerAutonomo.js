@@ -42,12 +42,12 @@ export default function EntrarAutonomo({navigation}) {
     const handleSubmit = async () => {
         try {
             if (!email || !password) {
-                setError('Email and password are required.');
+                setError('Email e senha são requeridos.');
                 return;
             }
 
             if (!isEmailValid(email)) {
-                setError('Invalid email address.');
+                setError('Email inválido! Por favor, digite um email válido.');
                 return;
             }
 
@@ -96,7 +96,7 @@ export default function EntrarAutonomo({navigation}) {
         <View style={styles.container}>
             <View style={styles.topo}>
                 <Image
-                    source={require('../img/logo.png')}
+                    source={require('../img/logo2.png')}
                     style={{width: 140, height: 140}}
                 />
                 <Text style={styles.title}>Login Autônomo</Text>
@@ -128,7 +128,7 @@ export default function EntrarAutonomo({navigation}) {
                 {error ? <Text style={styles.errorText}>{error}</Text> : null}
             </View>
             <TouchableOpacity style={styles.toggleButton} onPress={goToRegister}>
-                <Text style={styles.toggleButtonText}>Não tenho uma conta</Text>
+                <Text style={styles.toggleButtonText}>Criar sua conta no MeuBico</Text>
             </TouchableOpacity>
         </View>
     );

@@ -42,13 +42,12 @@ export default function EntrarCliente({navigation}) {
 
     const handleSubmit = async () => {
         try {
-            if (!email || !password) {
-                setError('Email and password are required.');
+            if (!email && !password) {
+                setError('Email e senha são requeridos.');
                 return;
             }
-
             if (!isEmailValid(email)) {
-                setError('Invalid email address.');
+                setError('Email inválido! Por favor, digite um email válido.');
                 return;
             }
 
@@ -96,9 +95,11 @@ export default function EntrarCliente({navigation}) {
         <View style={styles.container}>
             <View style={styles.topo}>
                 <Image
-                    source={require('../img/logo.png')}
-                    style={{width: 140, height: 140}}
+                    source={require('../img/logo2.png')}
+                    style={{width: 110, height: 110}}
                 />
+                <Text style={styles.logo}>MeuBico</Text>
+
                 <Text style={styles.title}>Login Cliente</Text>
                 <Text style={styles.subtitle}>
                     Entre e explore todas as vantagens do nosso aplicativo
@@ -128,7 +129,7 @@ export default function EntrarCliente({navigation}) {
                 {error ? <Text style={styles.errorText}>{error}</Text> : null}
             </View>
             <TouchableOpacity style={styles.toggleButton} onPress={goToRegister}>
-                <Text style={styles.toggleButtonText}>Não tenho uma conta</Text>
+                <Text style={styles.toggleButtonText}>Criar sua conta no MeuBico</Text>
             </TouchableOpacity>
         </View>
     );
@@ -146,9 +147,19 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 30,
     },
-    title: {
+    logo: {
+        fontWeight: 'bold',
+        fontFamily: 'Roboto',
         fontSize: 40,
         color: '#1333cd',
+        textAlign: 'center',
+    },
+    title: {
+        marginTop: 10,
+        fontWeight: 'bold',
+        fontSize: 20,
+        // color: '#1333cd',
+        color: '#000',
         textAlign: 'center',
     },
     subtitle: {

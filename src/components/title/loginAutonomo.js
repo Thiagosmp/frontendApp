@@ -104,7 +104,7 @@ export default function Autonomo({ navigation }) {
       <ScrollView  style={styles.container}>
         <View style={styles.topo}>
           <Image
-              source={require('../img/logo.png')}
+              source={require('../img/logo2.png')}
               style={{ width: 140, height: 140 }}
           />
           <Text style={styles.title}>Criar Conta Autônomo</Text>
